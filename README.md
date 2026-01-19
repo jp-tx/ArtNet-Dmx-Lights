@@ -1,4 +1,4 @@
 I created this because i have an artnet controller and wireless dmx lights i wanted to use in my home, you can create presets for fixtures and groups of fixtures, with live feedback when setting up, that then can be saved and recalled either by a set time or by astronomical time (sunrise/sunset by zip code or exact location) ill be uploading the docker container for the dotnet website, ill give you commands/compose at some point, but you can also just build it pretty easily
 
 
-this also has a fully functional api if you want to integrate artnet control into your application in a lightweight manner
+this also has a fully functional api if you want to integrate artnet control into your application in a lightweight manner, in my case im using a tcp socket from a crestron system, but this should be easy from homeassistant or nearly anything else that can send a webrequest, just make a preset, and then on the live control page theres a copy curl command button that will give you exactly what you need
