@@ -1,0 +1,148 @@
+[
+  {
+    "id": "9f8a451f-be99-4f9c-8dc1-b730a9cf691b",
+    "name": "white high",
+    "fadeMs": 0,
+    "groups": [
+      {
+        "groupId": "9635b00d-741c-47f1-ac41-4bd87e123376",
+        "values": [
+          255,
+          255,
+          255,
+          255,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "9d6252ad-8283-4229-a8fb-c9a71220152b",
+    "name": "red high",
+    "fadeMs": 0,
+    "groups": [
+      {
+        "groupId": "9635b00d-741c-47f1-ac41-4bd87e123376",
+        "values": [
+          255,
+          0,
+          0,
+          255,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "3cee5235-cce8-4148-b594-1a11f8be41fb",
+    "name": "green high",
+    "fadeMs": 0,
+    "groups": [
+      {
+        "groupId": "9635b00d-741c-47f1-ac41-4bd87e123376",
+        "values": [
+          0,
+          255,
+          0,
+          255,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "a48d2bf6-f3dc-4af2-a790-513676fde586",
+    "name": "blue high",
+    "fadeMs": 0,
+    "groups": [
+      {
+        "groupId": "9635b00d-741c-47f1-ac41-4bd87e123376",
+        "values": [
+          0,
+          0,
+          255,
+          255,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "d88bc766-cef3-49bb-844b-305fa4dd8314",
+    "name": "blackout",
+    "fadeMs": 0,
+    "groups": [
+      {
+        "groupId": "9635b00d-741c-47f1-ac41-4bd87e123376",
+        "values": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  {
+    "id": "00df574f-8d27-47e1-b7f6-172aa7da09f1",
+    "name": "brightness med",
+    "fadeMs": 0,
+    "groups": [
+      {
+        "groupId": "a55f6133-334c-4036-af03-01f42516b811",
+        "values": [
+          131
+        ]
+      }
+    ]
+  },
+  {
+    "id": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "name": "brightness low",
+    "fadeMs": 0,
+    "groups": [
+      {
+        "groupId": "a55f6133-334c-4036-af03-01f42516b811",
+        "values": [
+          22
+        ]
+      }
+    ]
+  }
+]

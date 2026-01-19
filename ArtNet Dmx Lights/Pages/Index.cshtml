@@ -1,0 +1,150 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Control";
+}
+
+<section>
+    <h1 class="page-title">Live Control</h1>
+    <p class="page-subtitle">Switch presets instantly or let the schedule take over.</p>
+
+    <div class="grid two">
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Presets</h3>
+                <span class="status-pill" id="activePresetLabel">Idle</span>
+            </div>
+            <div id="presetList" class="list"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Now Playing</h3>
+                <span class="tag" id="activeSourceLabel">manual</span>
+            </div>
+            <div class="list">
+                <div class="list-item">
+                    <div class="mono">Active preset</div>
+                    <strong id="activePresetName">None</strong>
+                </div>
+                <div class="list-item">
+                    <div class="mono">Last scheduled</div>
+                    <strong id="lastScheduledTime">None</strong>
+                </div>
+            </div>
+            <div class="notice" id="controlNotice" style="margin-top:16px; display:none;"></div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+  const presetList = document.getElementById("presetList");
+  const activePresetLabel = document.getElementById("activePresetLabel");
+  const activePresetName = document.getElementById("activePresetName");
+  const activeSourceLabel = document.getElementById("activeSourceLabel");
+  const lastScheduledTime = document.getElementById("lastScheduledTime");
+  const controlNotice = document.getElementById("controlNotice");
+
+  let noticeTimer = null;
+  const showNotice = (text, durationMs = 4000) => {
+    controlNotice.textContent = text;
+    controlNotice.style.display = "block";
+    if (noticeTimer) {
+      clearTimeout(noticeTimer);
+      noticeTimer = null;
+    }
+    if (durationMs !== null) {
+      noticeTimer = setTimeout(() => {
+        controlNotice.style.display = "none";
+        noticeTimer = null;
+      }, durationMs);
+    }
+  };
+
+  async function loadPresets() {
+    const presets = await app.api("/api/v1/presets");
+    presetList.innerHTML = "";
+    if (!presets.length) {
+      presetList.innerHTML = "<div class='list-item'>No presets yet. Create one in Presets.</div>";
+      return;
+    }
+
+    presets.forEach((preset) => {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      item.innerHTML = `
+        <header>
+          <div>
+            <h4>${preset.name}</h4>
+            <div class="mono">Fade ${preset.fadeMs} ms</div>
+          </div>
+          <div class="row">
+            <button class="btn" data-action="activate">Activate</button>
+            <button class="btn secondary" data-action="copy">Copy curl</button>
+          </div>
+        </header>
+      `;
+      item.querySelector("[data-action='activate']").addEventListener("click", async () => {
+        try {
+          showNotice(`Activating ${preset.name}...`, null);
+          await app.api(`/api/v1/presets/${preset.id}/activate`, { method: "POST" });
+          showNotice(`Activated ${preset.name}.`);
+          await loadStatus();
+        } catch (error) {
+          showNotice(error.message);
+        }
+      });
+      item.querySelector("[data-action='copy']").addEventListener("click", async () => {
+        const url = `${window.location.origin}/api/v1/presets/${preset.id}/activate`;
+        const command = `curl -X POST "${url}"`;
+        try {
+          await copyToClipboard(command);
+          showNotice("Curl command copied.");
+        } catch {
+          showNotice("Could not copy. Use the command shown in console.");
+          console.log(command);
+        }
+      });
+      presetList.appendChild(item);
+    });
+  }
+
+  async function loadStatus() {
+    const status = await app.api("/api/v1/status");
+    activePresetLabel.textContent = status.activePresetId ? "Active" : "Idle";
+    activeSourceLabel.textContent = status.activeSource || "manual";
+    lastScheduledTime.textContent = status.lastScheduledAt ? app.formatTime(status.lastScheduledAt) : "None";
+
+    if (!status.activePresetId) {
+      activePresetName.textContent = "None";
+      return;
+    }
+
+    const presets = await app.api("/api/v1/presets");
+    const active = presets.find(p => p.id === status.activePresetId);
+    activePresetName.textContent = active ? active.name : "Unknown";
+  }
+
+  loadPresets().then(loadStatus).catch(error => showNotice(error.message));
+
+  async function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    if (!ok) {
+      throw new Error("copy failed");
+    }
+  }
+</script>
+}

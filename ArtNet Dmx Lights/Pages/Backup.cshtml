@@ -1,0 +1,78 @@
+@page
+@{
+    ViewData["Title"] = "Backup";
+}
+
+<section>
+    <h1 class="page-title">Backup & Restore</h1>
+    <p class="page-subtitle">Export configuration as JSON or restore from a previous download.</p>
+
+    <div class="grid two">
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Export</h3>
+                <span class="tag">Config only</span>
+            </div>
+            <p class="page-subtitle">Download current settings, groups, presets, and schedules.</p>
+            <button class="btn" id="downloadBackup">Download JSON</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Import</h3>
+                <span class="tag">Replace</span>
+            </div>
+            <div class="field">
+                <label for="backupFile">Backup file</label>
+                <input id="backupFile" type="file" accept="application/json" />
+            </div>
+            <button class="btn secondary" id="importBackup">Restore backup</button>
+            <div class="notice" id="backupNotice" style="margin-top:16px; display:none;"></div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+  const backupNotice = document.getElementById("backupNotice");
+  const backupFile = document.getElementById("backupFile");
+
+  const showNotice = (text) => {
+    backupNotice.textContent = text;
+    backupNotice.style.display = "block";
+    setTimeout(() => backupNotice.style.display = "none", 4000);
+  };
+
+  document.getElementById("downloadBackup").addEventListener("click", async () => {
+    try {
+      const bundle = await app.api("/api/v1/backup");
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "artnet-backup.json";
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+
+  document.getElementById("importBackup").addEventListener("click", async () => {
+    const file = backupFile.files[0];
+    if (!file) {
+      showNotice("Select a backup file first.");
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const payload = JSON.parse(text);
+      await app.api("/api/v1/backup", { method: "POST", body: JSON.stringify(payload) });
+      showNotice("Backup restored.");
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+</script>
+}

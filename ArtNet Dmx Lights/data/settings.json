@@ -1,0 +1,16 @@
+{
+  "controllerHost": "10.0.10.173",
+  "artnetPort": 6454,
+  "artnetNet": 0,
+  "artnetSubNet": 0,
+  "universeBase": 0,
+  "zipCode": "37201",
+  "resolvedTimeZone": "America/Chicago",
+  "resolvedLat": 36.1657,
+  "resolvedLon": -86.7781,
+  "manualTimeZone": "",
+  "manualLat": null,
+  "manualLon": null,
+  "lastSunriseUtc": "2026-01-19T12:54:20+00:00",
+  "lastSunsetUtc": "2026-01-19T23:01:27+00:00"
+}

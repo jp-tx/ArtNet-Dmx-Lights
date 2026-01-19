@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ArtNet DMX Control</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ArtNet_Dmx_Lights.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="app-header">
+            <a class="brand" asp-area="" asp-page="/Index">
+                <span class="brand-mark"></span>
+                ArtNet DMX Control
+            </a>
+            <nav class="nav">
+                <a asp-area="" asp-page="/Index">Control</a>
+                <a asp-area="" asp-page="/Settings">Settings</a>
+                <a asp-area="" asp-page="/Groups">Groups</a>
+                <a asp-area="" asp-page="/Presets">Presets</a>
+                <a asp-area="" asp-page="/Schedule">Scheduling</a>
+                <a asp-area="" asp-page="/Logs">Logs</a>
+                <a asp-area="" asp-page="/Backup">Backup</a>
+            </nav>
+        </header>
+        <main role="main" class="app-main">
+            @RenderBody()
+        </main>
+        <footer class="app-footer">
+            ArtNet DMX Control - Local LAN interface
+        </footer>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

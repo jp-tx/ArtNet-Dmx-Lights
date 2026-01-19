@@ -1,0 +1,289 @@
+@page
+@{
+    ViewData["Title"] = "Presets";
+}
+
+<section>
+    <h1 class="page-title">Preset Builder</h1>
+    <p class="page-subtitle">Build multi-group scenes with unified fades.</p>
+
+    <div class="grid two">
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Preset Editor</h3>
+                <span class="tag" id="editorStatus">New</span>
+            </div>
+            <div class="field">
+                <label for="presetName">Preset name</label>
+                <input id="presetName" type="text" placeholder="Evening Glow" />
+            </div>
+            <div class="field">
+                <label for="presetFade">Fade (ms)</label>
+                <input id="presetFade" type="number" min="0" max="600000" value="0" />
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label for="groupSelect">Add fixture group</label>
+                    <select id="groupSelect"></select>
+                </div>
+                <div class="field" style="align-self:end;">
+                    <button class="btn secondary" id="addGroup">Add group</button>
+                </div>
+            </div>
+            <div id="presetGroups" class="list"></div>
+            <div class="row" style="margin-top:16px;">
+                <button class="btn" id="savePreset">Save preset</button>
+                <button class="btn ghost" id="resetPreset">Reset</button>
+            </div>
+            <div class="notice" id="presetNotice" style="margin-top:16px; display:none;"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Saved Presets</h3>
+                <span class="tag" id="presetCount">0 presets</span>
+            </div>
+            <div id="presetList" class="list"></div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+  const presetNotice = document.getElementById("presetNotice");
+  const presetName = document.getElementById("presetName");
+  const presetFade = document.getElementById("presetFade");
+  const groupSelect = document.getElementById("groupSelect");
+  const presetGroups = document.getElementById("presetGroups");
+  const presetList = document.getElementById("presetList");
+  const editorStatus = document.getElementById("editorStatus");
+  const presetCount = document.getElementById("presetCount");
+  let previewTimeout = null;
+
+  const state = {
+    groups: [],
+    presets: [],
+    draft: {
+      id: null,
+      name: "",
+      fadeMs: 0,
+      groups: []
+    }
+  };
+
+  const showNotice = (text) => {
+    presetNotice.textContent = text;
+    presetNotice.style.display = "block";
+    setTimeout(() => presetNotice.style.display = "none", 4000);
+  };
+
+  async function loadGroups() {
+    state.groups = await app.api("/api/v1/groups");
+    groupSelect.innerHTML = "";
+    state.groups.forEach(group => {
+      const option = document.createElement("option");
+      option.value = group.id;
+      option.textContent = `${group.name} (U${group.universe} ${group.startChannel}-${group.startChannel + group.channelCount - 1})`;
+      groupSelect.appendChild(option);
+    });
+  }
+
+  async function loadPresets() {
+    state.presets = await app.api("/api/v1/presets");
+    presetList.innerHTML = "";
+    presetCount.textContent = `${state.presets.length} presets`;
+    if (!state.presets.length) {
+      presetList.innerHTML = "<div class='list-item'>No presets saved yet.</div>";
+      return;
+    }
+
+    state.presets.forEach(preset => {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      item.innerHTML = `
+        <header>
+          <div>
+            <h4>${preset.name}</h4>
+            <div class="mono">${preset.groups.length} group(s) - Fade ${preset.fadeMs} ms</div>
+          </div>
+          <div class="row">
+            <button class="btn secondary" data-action="load">Edit</button>
+            <button class="btn" data-action="activate">Activate</button>
+            <button class="btn danger" data-action="delete">Delete</button>
+          </div>
+        </header>
+      `;
+      item.querySelector("[data-action='load']").addEventListener("click", () => loadPreset(preset));
+      item.querySelector("[data-action='activate']").addEventListener("click", async () => {
+        try {
+          await app.api(`/api/v1/presets/${preset.id}/activate`, { method: "POST" });
+          showNotice(`Activated ${preset.name}.`);
+        } catch (error) {
+          showNotice(error.message);
+        }
+      });
+      item.querySelector("[data-action='delete']").addEventListener("click", async () => {
+        try {
+          await app.api(`/api/v1/presets/${preset.id}`, { method: "DELETE" });
+          showNotice("Preset deleted.");
+          await loadPresets();
+        } catch (error) {
+          showNotice(error.message);
+        }
+      });
+      presetList.appendChild(item);
+    });
+  }
+
+  function loadPreset(preset) {
+    state.draft = JSON.parse(JSON.stringify(preset));
+    presetName.value = preset.name;
+    presetFade.value = preset.fadeMs;
+    editorStatus.textContent = "Editing";
+    renderDraftGroups();
+  }
+
+  function resetDraft() {
+    state.draft = { id: null, name: "", fadeMs: 0, groups: [] };
+    presetName.value = "";
+    presetFade.value = 0;
+    editorStatus.textContent = "New";
+    renderDraftGroups();
+  }
+
+  function renderDraftGroups() {
+    presetGroups.innerHTML = "";
+    if (!state.draft.groups.length) {
+      presetGroups.innerHTML = "<div class='list-item'>Add a fixture group to start building values.</div>";
+      return;
+    }
+
+    state.draft.groups.forEach((groupEntry, index) => {
+      const group = state.groups.find(g => g.id === groupEntry.groupId);
+      if (!group) return;
+      const block = document.createElement("div");
+      block.className = "list-item";
+      block.innerHTML = `
+        <header>
+          <h4>${group.name}</h4>
+          <button class="btn ghost" data-action="remove">Remove</button>
+        </header>
+        <div class="slider-group"></div>
+      `;
+      const sliderGroup = block.querySelector(".slider-group");
+      groupEntry.values.forEach((value, channelIndex) => {
+        const slider = document.createElement("div");
+        slider.className = "slider";
+        slider.innerHTML = `
+          <div class="mono">CH ${group.startChannel + channelIndex}</div>
+          <input type="range" min="0" max="255" value="${value}" />
+          <input type="number" min="0" max="255" value="${value}" />
+        `;
+        const range = slider.querySelector("input[type='range']");
+        const number = slider.querySelector("input[type='number']");
+        range.addEventListener("input", () => {
+          number.value = range.value;
+          groupEntry.values[channelIndex] = Number(range.value);
+          queuePreview();
+        });
+        number.addEventListener("input", () => {
+          range.value = number.value;
+          groupEntry.values[channelIndex] = Number(number.value);
+          queuePreview();
+        });
+        sliderGroup.appendChild(slider);
+      });
+
+      block.querySelector("[data-action='remove']").addEventListener("click", () => {
+        state.draft.groups.splice(index, 1);
+        renderDraftGroups();
+        queuePreview();
+      });
+
+      presetGroups.appendChild(block);
+    });
+  }
+
+  document.getElementById("addGroup").addEventListener("click", () => {
+    const groupId = groupSelect.value;
+    const group = state.groups.find(g => g.id === groupId);
+    if (!group) return;
+    if (state.draft.groups.some(g => g.groupId === groupId)) {
+      showNotice("Group already added.");
+      return;
+    }
+
+    state.draft.groups.push({
+      groupId,
+      values: Array.from({ length: group.channelCount }, () => 0)
+    });
+    renderDraftGroups();
+    queuePreview();
+  });
+
+  document.getElementById("savePreset").addEventListener("click", async () => {
+    const payload = buildPayload();
+    if (!payload.name) {
+      showNotice("Preset name is required.");
+      return;
+    }
+    if (!payload.groups.length) {
+      showNotice("Add at least one fixture group.");
+      return;
+    }
+    try {
+      if (payload.id) {
+        await app.api(`/api/v1/presets/${payload.id}`, { method: "PUT", body: JSON.stringify(payload) });
+        showNotice("Preset updated.");
+      } else {
+        await app.api("/api/v1/presets", { method: "POST", body: JSON.stringify(payload) });
+        showNotice("Preset saved.");
+      }
+      await loadPresets();
+      resetDraft();
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+
+  document.getElementById("resetPreset").addEventListener("click", resetDraft);
+
+  Promise.all([loadGroups(), loadPresets()])
+    .then(resetDraft)
+    .catch(error => showNotice(error.message));
+
+  function queuePreview() {
+    if (!state.draft.groups.length) {
+      return;
+    }
+
+    if (previewTimeout) {
+      clearTimeout(previewTimeout);
+    }
+
+    previewTimeout = setTimeout(async () => {
+      previewTimeout = null;
+      const payload = buildPayload({ fadeMs: 0 });
+      try {
+        await app.api("/api/v1/presets/preview", { method: "POST", body: JSON.stringify(payload) });
+      } catch (error) {
+        showNotice(error.message);
+      }
+    }, 150);
+  }
+
+  function buildPayload(overrides = {}) {
+    const payload = {
+      id: state.draft.id,
+      name: presetName.value.trim(),
+      fadeMs: Number(presetFade.value),
+      groups: state.draft.groups
+    };
+    Object.assign(payload, overrides);
+    if (!payload.id) {
+      delete payload.id;
+    }
+    return payload;
+  }
+</script>
+}

@@ -1,0 +1,142 @@
+@page
+@{
+    ViewData["Title"] = "Logs";
+}
+
+<section>
+    <h1 class="page-title">Event Logs</h1>
+    <p class="page-subtitle">Filter the last 72 hours of activity.</p>
+
+    <div class="grid two">
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Filters</h3>
+                <span class="tag">72 hours</span>
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label for="logFrom">From</label>
+                    <input id="logFrom" type="datetime-local" />
+                </div>
+                <div class="field">
+                    <label for="logTo">To</label>
+                    <input id="logTo" type="datetime-local" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label for="logType">Type</label>
+                    <select id="logType">
+                        <option value="">All</option>
+                        <option value="DmxChange">DMX Change</option>
+                        <option value="PresetSaved">Preset Saved</option>
+                        <option value="PresetUpdated">Preset Updated</option>
+                        <option value="PresetDeleted">Preset Deleted</option>
+                        <option value="SunriseTick">Sunrise Tick</option>
+                        <option value="SunsetTick">Sunset Tick</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="logPreset">Preset</label>
+                    <select id="logPreset"></select>
+                </div>
+                <div class="field">
+                    <label for="logGroup">Group</label>
+                    <select id="logGroup"></select>
+                </div>
+            </div>
+            <button class="btn" id="applyLogFilters">Apply filters</button>
+            <div class="notice" id="logNotice" style="margin-top:16px; display:none;"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Results</h3>
+                <span class="tag" id="logCount">0 entries</span>
+            </div>
+            <div style="overflow:auto; max-height:460px;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Time (UTC)</th>
+                            <th>Type</th>
+                            <th>Preset</th>
+                            <th>Group</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logRows"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+  const logRows = document.getElementById("logRows");
+  const logCount = document.getElementById("logCount");
+  const logNotice = document.getElementById("logNotice");
+  const filters = {
+    from: document.getElementById("logFrom"),
+    to: document.getElementById("logTo"),
+    type: document.getElementById("logType"),
+    preset: document.getElementById("logPreset"),
+    group: document.getElementById("logGroup")
+  };
+
+  const showNotice = (text) => {
+    logNotice.textContent = text;
+    logNotice.style.display = "block";
+    setTimeout(() => logNotice.style.display = "none", 4000);
+  };
+
+  async function loadOptions() {
+    const presets = await app.api("/api/v1/presets");
+    const groups = await app.api("/api/v1/groups");
+    filters.preset.innerHTML = "<option value=''>All</option>";
+    presets.forEach(p => {
+      const option = document.createElement("option");
+      option.value = p.id;
+      option.textContent = p.name;
+      filters.preset.appendChild(option);
+    });
+
+    filters.group.innerHTML = "<option value=''>All</option>";
+    groups.forEach(g => {
+      const option = document.createElement("option");
+      option.value = g.id;
+      option.textContent = g.name;
+      filters.group.appendChild(option);
+    });
+  }
+
+  async function loadLogs() {
+    const params = new URLSearchParams();
+    if (filters.from.value) params.append("from", new Date(filters.from.value).toISOString());
+    if (filters.to.value) params.append("to", new Date(filters.to.value).toISOString());
+    if (filters.type.value) params.append("type", filters.type.value);
+    if (filters.preset.value) params.append("presetId", filters.preset.value);
+    if (filters.group.value) params.append("groupId", filters.group.value);
+
+    const logs = await app.api(`/api/v1/logs?${params.toString()}`);
+    logRows.innerHTML = "";
+    logCount.textContent = `${logs.length} entries`;
+    logs.forEach(log => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${app.formatTime(log.timestampUtc)}</td>
+        <td>${log.type}</td>
+        <td>${log.presetName || "-"}</td>
+        <td>${log.groupName || "-"}</td>
+      `;
+      logRows.appendChild(row);
+    });
+  }
+
+  document.getElementById("applyLogFilters").addEventListener("click", () => {
+    loadLogs().catch(error => showNotice(error.message));
+  });
+
+  Promise.all([loadOptions(), loadLogs()]).catch(error => showNotice(error.message));
+</script>
+}

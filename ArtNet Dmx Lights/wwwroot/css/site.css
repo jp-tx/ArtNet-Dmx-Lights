@@ -1,0 +1,334 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+:root {
+  --bg: #0b1413;
+  --bg-glow: #0f1d1a;
+  --panel: #101b1a;
+  --panel-strong: #152321;
+  --text: #f1f2ea;
+  --muted: #a7b1ac;
+  --stroke: rgba(255, 255, 255, 0.08);
+  --accent: #ff8a3d;
+  --accent-2: #5fd7c6;
+  --danger: #ff5a5a;
+  --shadow: 0 24px 40px rgba(0, 0, 0, 0.35);
+  --radius: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: radial-gradient(1200px 800px at 20% -10%, rgba(95, 215, 198, 0.2), transparent 60%),
+    radial-gradient(900px 600px at 90% 10%, rgba(255, 138, 61, 0.18), transparent 65%),
+    linear-gradient(160deg, var(--bg) 20%, var(--bg-glow) 100%);
+}
+
+.app-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  padding: 24px clamp(20px, 4vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--stroke);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  box-shadow: 0 8px 16px rgba(255, 138, 61, 0.3);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.nav a:hover,
+.nav a.active {
+  color: var(--text);
+  border-color: var(--stroke);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.app-main {
+  flex: 1;
+  padding: clamp(20px, 4vw, 48px);
+}
+
+.page-title {
+  font-size: clamp(28px, 4vw, 42px);
+  margin: 0 0 8px;
+}
+
+.page-subtitle {
+  color: var(--muted);
+  margin: 0 0 32px;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.grid.two {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.grid.three {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panel-title {
+  font-size: 18px;
+  margin: 0;
+}
+
+.tag {
+  font-size: 12px;
+  font-family: "IBM Plex Mono", monospace;
+  color: var(--muted);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.field input,
+.field select,
+.field textarea {
+  background: var(--panel-strong);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: 2px solid rgba(95, 215, 198, 0.5);
+  outline-offset: 2px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.row > * {
+  flex: 1 1 140px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: linear-gradient(120deg, var(--accent), #ffb167);
+  color: #1a120b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn.secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--stroke);
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--muted);
+  border-color: transparent;
+}
+
+.btn.danger {
+  background: linear-gradient(120deg, #ff5a5a, #ff8a8a);
+  color: #240b0b;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(255, 138, 61, 0.25);
+}
+
+.btn.secondary:hover {
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.list-item {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: rgba(15, 25, 24, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-item header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.list-item h4 {
+  margin: 0;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.slider-group {
+  display: grid;
+  gap: 10px;
+}
+
+.slider {
+  display: grid;
+  grid-template-columns: 60px 1fr 48px;
+  gap: 10px;
+  align-items: center;
+}
+
+.slider input[type="range"] {
+  width: 100%;
+}
+
+.status-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(95, 215, 198, 0.2);
+  color: var(--accent-2);
+}
+
+.notice {
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 215, 198, 0.4);
+  background: rgba(95, 215, 198, 0.08);
+  color: var(--accent-2);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--stroke);
+  text-align: left;
+}
+
+.table th {
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
+
+.app-footer {
+  padding: 18px clamp(20px, 4vw, 48px) 28px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}

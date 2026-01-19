@@ -1,0 +1,23 @@
+[
+  {
+    "id": "9635b00d-741c-47f1-ac41-4bd87e123376",
+    "name": "mains",
+    "universe": 0,
+    "startChannel": 1,
+    "channelCount": 12
+  },
+  {
+    "id": "a55f6133-334c-4036-af03-01f42516b811",
+    "name": "brightness only",
+    "universe": 0,
+    "startChannel": 4,
+    "channelCount": 1
+  },
+  {
+    "id": "06a3eba1-9f92-4ba9-bcc3-0f2b860d2d86",
+    "name": "corners",
+    "universe": 0,
+    "startChannel": 1,
+    "channelCount": 4
+  }
+]

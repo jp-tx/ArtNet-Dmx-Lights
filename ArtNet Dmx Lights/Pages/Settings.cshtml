@@ -1,0 +1,262 @@
+@page
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<section>
+    <h1 class="page-title">Network Settings</h1>
+    <p class="page-subtitle">Define controller addressing, ArtNet port mapping, and zip-based time zone.</p>
+
+    <div class="grid two">
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Controller</h3>
+                <span class="tag">ArtNet 3</span>
+            </div>
+            <div class="field">
+                <label for="controllerHost">Controller host (IP or DNS)</label>
+                <input id="controllerHost" type="text" placeholder="192.168.0.50" />
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label for="artnetPort">ArtNet UDP port</label>
+                    <input id="artnetPort" type="number" min="1" max="65535" />
+                </div>
+                <div class="field">
+                    <label for="universeBase">Universe base</label>
+                    <select id="universeBase">
+                        <option value="0">0-based (0-1)</option>
+                        <option value="1">1-based (1-2)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label for="artnetNet">ArtNet Net</label>
+                    <input id="artnetNet" type="number" min="0" max="127" />
+                </div>
+                <div class="field">
+                    <label for="artnetSubNet">ArtNet SubNet</label>
+                    <input id="artnetSubNet" type="number" min="0" max="15" />
+                </div>
+            </div>
+            <button class="btn" id="saveSettings">Save settings</button>
+            <button class="btn secondary" id="discoverDevices" style="margin-top:12px;">Discover ArtNet devices</button>
+            <div class="notice" id="discoverNotice" style="margin-top:12px; display:none;"></div>
+            <div id="discoverResults" class="list" style="margin-top:12px;"></div>
+            <div class="notice" id="settingsNotice" style="margin-top:16px; display:none;"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Astronomical Timing</h3>
+                <span class="tag">US ZIP</span>
+            </div>
+            <div class="field">
+                <label for="zipCode">Zip code</label>
+                <input id="zipCode" type="text" placeholder="78701" maxlength="5" />
+            </div>
+            <div class="notice" id="zipNotice" style="display:none;"></div>
+            <div class="field">
+                <label for="manualTimeZone">Manual time zone override</label>
+                <input id="manualTimeZone" type="text" placeholder="America/Chicago" />
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label for="manualLat">Manual latitude override</label>
+                    <input id="manualLat" type="number" step="0.000001" placeholder="36.522" />
+                </div>
+                <div class="field">
+                    <label for="manualLon">Manual longitude override</label>
+                    <input id="manualLon" type="number" step="0.000001" placeholder="-87.349" />
+                </div>
+            </div>
+            <div class="field">
+                <label>Resolved time zone</label>
+                <input id="resolvedTimeZone" type="text" readonly />
+            </div>
+            <div class="field">
+                <label>Resolved coordinates</label>
+                <input id="resolvedLatLon" type="text" readonly />
+            </div>
+            <button class="btn secondary" id="saveZip">Save zip</button>
+            <div class="notice" id="timezoneNotice">
+                Time zone and coordinates are resolved on save and cached for offline fallback.
+            </div>
+            <div class="notice">
+                Manual overrides take precedence when set.
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+  const fields = {
+    controllerHost: document.getElementById("controllerHost"),
+    artnetPort: document.getElementById("artnetPort"),
+    artnetNet: document.getElementById("artnetNet"),
+    artnetSubNet: document.getElementById("artnetSubNet"),
+    universeBase: document.getElementById("universeBase"),
+    zipCode: document.getElementById("zipCode"),
+    manualTimeZone: document.getElementById("manualTimeZone"),
+    manualLat: document.getElementById("manualLat"),
+    manualLon: document.getElementById("manualLon"),
+    resolvedTimeZone: document.getElementById("resolvedTimeZone"),
+    resolvedLatLon: document.getElementById("resolvedLatLon")
+  };
+  const notice = document.getElementById("settingsNotice");
+  const zipNotice = document.getElementById("zipNotice");
+  const discoverNotice = document.getElementById("discoverNotice");
+  const discoverResults = document.getElementById("discoverResults");
+
+  const showNotice = (text) => {
+    notice.textContent = text;
+    notice.style.display = "block";
+    setTimeout(() => notice.style.display = "none", 4000);
+  };
+
+  const showZipNotice = (text) => {
+    if (!text) {
+      zipNotice.textContent = "";
+      zipNotice.style.display = "none";
+      return;
+    }
+    zipNotice.textContent = text;
+    zipNotice.style.display = "block";
+  };
+
+  const showDiscoverNotice = (text) => {
+    if (!text) {
+      discoverNotice.textContent = "";
+      discoverNotice.style.display = "none";
+      return;
+    }
+    discoverNotice.textContent = text;
+    discoverNotice.style.display = "block";
+  };
+
+  async function loadSettings() {
+    const settings = await app.api("/api/v1/settings");
+    fields.controllerHost.value = settings.controllerHost || "";
+    fields.artnetPort.value = settings.artnetPort ?? 6454;
+    fields.artnetNet.value = settings.artnetNet ?? 0;
+    fields.artnetSubNet.value = settings.artnetSubNet ?? 0;
+    fields.universeBase.value = settings.universeBase ?? 0;
+    fields.zipCode.value = settings.zipCode || "";
+    fields.manualTimeZone.value = settings.manualTimeZone || "";
+    fields.manualLat.value = settings.manualLat ?? "";
+    fields.manualLon.value = settings.manualLon ?? "";
+    fields.resolvedTimeZone.value = settings.resolvedTimeZone || "";
+    const lat = settings.resolvedLat != null ? settings.resolvedLat.toFixed(5) : "";
+    const lon = settings.resolvedLon != null ? settings.resolvedLon.toFixed(5) : "";
+    fields.resolvedLatLon.value = lat && lon ? `${lat}, ${lon}` : "";
+    showZipNotice("");
+  }
+
+  async function saveSettings() {
+    const payload = {
+      controllerHost: fields.controllerHost.value.trim(),
+      artnetPort: Number(fields.artnetPort.value),
+      artnetNet: Number(fields.artnetNet.value),
+      artnetSubNet: Number(fields.artnetSubNet.value),
+      universeBase: Number(fields.universeBase.value),
+      zipCode: fields.zipCode.value.trim(),
+      manualTimeZone: fields.manualTimeZone.value.trim(),
+      manualLat: fields.manualLat.value === "" ? null : Number(fields.manualLat.value),
+      manualLon: fields.manualLon.value === "" ? null : Number(fields.manualLon.value)
+    };
+
+    try {
+      const response = await fetch("/api/v1/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        let errorText = "Request failed.";
+        try {
+          const payload = await response.json();
+          if (payload && payload.errors) {
+            errorText = payload.errors.join(" ");
+          }
+        } catch {
+          errorText = `${response.status} ${response.statusText}`;
+        }
+        showNotice(errorText);
+        return;
+      }
+
+      const updated = await response.json();
+      fields.resolvedTimeZone.value = updated.resolvedTimeZone || "";
+      const lat = updated.resolvedLat != null ? updated.resolvedLat.toFixed(5) : "";
+      const lon = updated.resolvedLon != null ? updated.resolvedLon.toFixed(5) : "";
+      fields.resolvedLatLon.value = lat && lon ? `${lat}, ${lon}` : "";
+      const warning = response.headers.get("X-Geo-Resolve-Warning");
+      showZipNotice(warning);
+      showNotice("Settings saved.");
+    } catch (error) {
+      showNotice(error.message);
+    }
+  }
+
+  document.getElementById("saveSettings").addEventListener("click", saveSettings);
+  document.getElementById("saveZip").addEventListener("click", saveSettings);
+  document.getElementById("discoverDevices").addEventListener("click", async () => {
+    showDiscoverNotice("");
+    discoverResults.innerHTML = "<div class='list-item'>Scanning...</div>";
+    try {
+      const result = await app.api("/api/v1/artnet/discover?timeoutMs=1500");
+      showDiscoverNotice(result.warning || "");
+      renderDiscoverResults(result.nodes || []);
+    } catch (error) {
+      discoverResults.innerHTML = "";
+      showDiscoverNotice(error.message);
+    }
+  });
+
+  loadSettings().catch(error => showNotice(error.message));
+
+  function renderDiscoverResults(nodes) {
+    discoverResults.innerHTML = "";
+    if (!nodes.length) {
+      discoverResults.innerHTML = "<div class='list-item'>No ArtNet devices found.</div>";
+      return;
+    }
+
+    nodes.forEach(node => {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      const name = node.shortName || node.longName || node.ipAddress;
+      const details = [];
+      if (node.ipAddress) {
+        details.push(node.ipAddress);
+      }
+      if (node.port) {
+        details.push(`port ${node.port}`);
+      }
+      if (node.longName && node.longName !== name) {
+        details.push(node.longName);
+      }
+      item.innerHTML = `
+        <header>
+          <div>
+            <h4>${name}</h4>
+            <div class="mono">${details.join(" - ")}</div>
+          </div>
+          <button class="btn secondary" data-action="use">Use</button>
+        </header>
+      `;
+      item.querySelector("[data-action='use']").addEventListener("click", async () => {
+        fields.controllerHost.value = node.ipAddress || "";
+        if (node.port) {
+          fields.artnetPort.value = node.port;
+        }
+        await saveSettings();
+      });
+      discoverResults.appendChild(item);
+    });
+  }
+</script>
+}

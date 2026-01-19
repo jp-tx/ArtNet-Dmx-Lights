@@ -1,0 +1,252 @@
+@page
+@{
+    ViewData["Title"] = "Scheduling";
+}
+
+<section>
+    <h1 class="page-title">Scheduling</h1>
+    <p class="page-subtitle">Run presets daily by fixed time or sunrise/sunset offsets.</p>
+
+    <div class="grid two">
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Create Schedule</h3>
+                <span class="tag">Daily</span>
+            </div>
+            <div class="field">
+                <label for="scheduleName">Schedule name</label>
+                <input id="scheduleName" type="text" placeholder="Morning Warm" />
+            </div>
+            <div class="row">
+                <div class="field">
+                    <label for="schedulePreset">Preset</label>
+                    <select id="schedulePreset"></select>
+                </div>
+                <div class="field">
+                    <label for="scheduleType">Type</label>
+                    <select id="scheduleType">
+                        <option value="fixed">Fixed</option>
+                        <option value="sunrise">Sunrise</option>
+                        <option value="sunset">Sunset</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="field" data-role="create-time">
+                    <label for="scheduleTime">Time (HH:mm)</label>
+                    <input id="scheduleTime" type="time" />
+                </div>
+                <div class="field" data-role="create-offset">
+                    <label for="scheduleOffset">Offset (minutes)</label>
+                    <input id="scheduleOffset" type="number" min="-720" max="720" value="0" />
+                </div>
+            </div>
+            <div class="field">
+                <label for="scheduleEnabled">Enabled</label>
+                <select id="scheduleEnabled">
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            <button class="btn" id="createSchedule">Add schedule</button>
+            <div class="notice" id="scheduleNotice" style="margin-top:16px; display:none;"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Schedules</h3>
+                <span class="tag" id="scheduleCount">0 schedules</span>
+            </div>
+            <div id="scheduleList" class="list"></div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+  const scheduleNotice = document.getElementById("scheduleNotice");
+  const scheduleList = document.getElementById("scheduleList");
+  const scheduleCount = document.getElementById("scheduleCount");
+  const fields = {
+    name: document.getElementById("scheduleName"),
+    preset: document.getElementById("schedulePreset"),
+    type: document.getElementById("scheduleType"),
+    time: document.getElementById("scheduleTime"),
+    offset: document.getElementById("scheduleOffset"),
+    enabled: document.getElementById("scheduleEnabled")
+  };
+
+  const showNotice = (text) => {
+    scheduleNotice.textContent = text;
+    scheduleNotice.style.display = "block";
+    setTimeout(() => scheduleNotice.style.display = "none", 4000);
+  };
+
+  async function loadPresets() {
+    const presets = await app.api("/api/v1/presets");
+    fields.preset.innerHTML = "";
+    presets.forEach(preset => {
+      const option = document.createElement("option");
+      option.value = preset.id;
+      option.textContent = preset.name;
+      fields.preset.appendChild(option);
+    });
+  }
+
+  async function loadSchedules() {
+    const schedules = await app.api("/api/v1/schedules");
+    scheduleList.innerHTML = "";
+    scheduleCount.textContent = `${schedules.length} schedules`;
+    if (!schedules.length) {
+      scheduleList.innerHTML = "<div class='list-item'>No schedules yet.</div>";
+      return;
+    }
+
+    schedules.forEach(schedule => {
+      const item = document.createElement("div");
+      item.className = "list-item";
+      item.innerHTML = `
+        <header>
+          <div>
+            <h4>${schedule.name}</h4>
+            <div class="mono">${schedule.type} - preset ${schedule.presetId}</div>
+          </div>
+          <span class="tag">${schedule.enabled ? "enabled" : "disabled"}</span>
+        </header>
+        <div class="row">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" value="${schedule.name}" />
+          </div>
+          <div class="field">
+            <label>Preset</label>
+            <select>${document.getElementById("schedulePreset").innerHTML}</select>
+          </div>
+          <div class="field">
+            <label>Type</label>
+            <select>
+              <option value="fixed">Fixed</option>
+              <option value="sunrise">Sunrise</option>
+              <option value="sunset">Sunset</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field" data-role="edit-time">
+            <label>Time</label>
+            <input type="time" value="${schedule.time || ""}" />
+          </div>
+          <div class="field" data-role="edit-offset">
+            <label>Offset (min)</label>
+            <input type="number" value="${schedule.offsetMinutes}" />
+          </div>
+          <div class="field">
+            <label>Enabled</label>
+            <select>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn secondary" data-action="save">Save</button>
+          <button class="btn danger" data-action="delete">Delete</button>
+        </div>
+      `;
+
+      const presetSelect = item.querySelectorAll("select")[0];
+      presetSelect.value = schedule.presetId;
+      const typeSelect = item.querySelectorAll("select")[1];
+      typeSelect.value = schedule.type;
+      const enabledSelect = item.querySelectorAll("select")[2];
+      enabledSelect.value = schedule.enabled ? "true" : "false";
+
+      const inputs = item.querySelectorAll("input");
+      updateFieldVisibility(typeSelect.value, item);
+      typeSelect.addEventListener("change", () => updateFieldVisibility(typeSelect.value, item));
+      item.querySelector("[data-action='save']").addEventListener("click", async () => {
+        const type = typeSelect.value;
+        const payload = {
+          name: inputs[0].value.trim(),
+          presetId: presetSelect.value,
+          type,
+          time: type === "fixed" ? inputs[1].value || null : null,
+          offsetMinutes: type === "fixed" ? 0 : Number(inputs[2].value),
+          enabled: enabledSelect.value === "true"
+        };
+        try {
+          await app.api(`/api/v1/schedules/${schedule.id}`, { method: "PUT", body: JSON.stringify(payload) });
+          showNotice("Schedule updated.");
+          await loadSchedules();
+        } catch (error) {
+          showNotice(error.message);
+        }
+      });
+
+      item.querySelector("[data-action='delete']").addEventListener("click", async () => {
+        try {
+          await app.api(`/api/v1/schedules/${schedule.id}`, { method: "DELETE" });
+          showNotice("Schedule deleted.");
+          await loadSchedules();
+        } catch (error) {
+          showNotice(error.message);
+        }
+      });
+
+      scheduleList.appendChild(item);
+    });
+  }
+
+  document.getElementById("createSchedule").addEventListener("click", async () => {
+    const type = fields.type.value;
+    const payload = {
+      name: fields.name.value.trim(),
+      presetId: fields.preset.value,
+      type,
+      time: type === "fixed" ? fields.time.value || null : null,
+      offsetMinutes: type === "fixed" ? 0 : Number(fields.offset.value),
+      enabled: fields.enabled.value === "true"
+    };
+    try {
+      await app.api("/api/v1/schedules", { method: "POST", body: JSON.stringify(payload) });
+      fields.name.value = "";
+      fields.time.value = "";
+      fields.offset.value = 0;
+      showNotice("Schedule added.");
+      await loadSchedules();
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+
+  loadPresets()
+    .then(loadSchedules)
+    .catch(error => showNotice(error.message));
+
+  fields.type.addEventListener("change", () => updateFieldVisibility(fields.type.value));
+  updateFieldVisibility(fields.type.value);
+
+  function updateFieldVisibility(type, scope = document) {
+    const timeField = scope.querySelector("[data-role='create-time'], [data-role='edit-time']");
+    const offsetField = scope.querySelector("[data-role='create-offset'], [data-role='edit-offset']");
+    if (!timeField || !offsetField) {
+      return;
+    }
+    const timeInput = timeField.querySelector("input");
+    const offsetInput = offsetField.querySelector("input");
+    if (type === "fixed") {
+      timeField.style.display = "";
+      offsetField.style.display = "none";
+      if (offsetInput) {
+        offsetInput.value = 0;
+      }
+    } else {
+      timeField.style.display = "none";
+      offsetField.style.display = "";
+      if (timeInput) {
+        timeInput.value = "";
+      }
+    }
+  }
+</script>
+}
