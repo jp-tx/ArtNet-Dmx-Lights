@@ -1,0 +1,6 @@
+services:
+  artnetdmxlights:
+    image: ${DOCKER_REGISTRY-}artnetdmxlights
+    build:
+      context: .
+      dockerfile: ArtNet Dmx Lights/Dockerfile

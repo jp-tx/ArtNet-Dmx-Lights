@@ -1,6 +1,6 @@
 {
   "activePresetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
-  "activeSource": "manual",
-  "lastScheduledAt": null,
-  "lastScheduledPresetId": null
+  "activeSource": "schedule",
+  "lastScheduledAt": "2026-01-19T23:21:11.4215486+00:00",
+  "lastScheduledPresetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02"
 }

@@ -1213,5 +1213,392 @@
     "presetName": "brightness low",
     "groupId": null,
     "groupName": null
+  },
+  {
+    "id": "f03e245b-c576-403f-9f79-9a0908c6f7b8",
+    "timestampUtc": "2026-01-19T22:00:21.1935525+00:00",
+    "type": "dmxChange",
+    "presetId": "9f8a451f-be99-4f9c-8dc1-b730a9cf691b",
+    "presetName": "white high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "2082db57-ac4d-4a5e-b61d-c341cd252562",
+    "timestampUtc": "2026-01-19T22:01:21.3701696+00:00",
+    "type": "dmxChange",
+    "presetId": "a48d2bf6-f3dc-4af2-a790-513676fde586",
+    "presetName": "blue high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "43b03421-9d3f-46c0-8fe7-7aa6c16f0d91",
+    "timestampUtc": "2026-01-19T22:02:21.5503976+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "711abd5f-26cf-4c22-8c55-015a4030490b",
+    "timestampUtc": "2026-01-19T22:05:26.9886114+00:00",
+    "type": "presetUpdated",
+    "presetId": "00df574f-8d27-47e1-b7f6-172aa7da09f1",
+    "presetName": "brightness med",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "d6af517a-3e54-4a11-abd4-f439b1e943da",
+    "timestampUtc": "2026-01-19T22:05:35.2568194+00:00",
+    "type": "presetUpdated",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "a1855506-9160-45aa-b6ea-5d3893e5b7b4",
+    "timestampUtc": "2026-01-19T22:05:46.5507624+00:00",
+    "type": "dmxChange",
+    "presetId": null,
+    "presetName": "brightness high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "3b4ff743-e8ad-41ec-812a-c44b0728fc68",
+    "timestampUtc": "2026-01-19T22:05:48.6271661+00:00",
+    "type": "dmxChange",
+    "presetId": null,
+    "presetName": "brightness high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "2b462d48-47ce-4a5f-8149-58ad925f113a",
+    "timestampUtc": "2026-01-19T22:05:49.6636561+00:00",
+    "type": "presetSaved",
+    "presetId": "6073ec88-2410-42b9-a181-6821d60206e1",
+    "presetName": "brightness high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "bd709e76-8c3e-4e33-bd48-474bb0f04883",
+    "timestampUtc": "2026-01-19T22:06:01.389043+00:00",
+    "type": "dmxChange",
+    "presetId": "00df574f-8d27-47e1-b7f6-172aa7da09f1",
+    "presetName": "brightness med",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "17827a84-2d66-4b2a-a435-c032833b9e8a",
+    "timestampUtc": "2026-01-19T22:06:14.0121775+00:00",
+    "type": "dmxChange",
+    "presetId": "00df574f-8d27-47e1-b7f6-172aa7da09f1",
+    "presetName": "brightness med",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "f193ddd8-3e9d-41a6-b106-2bd4299c6756",
+    "timestampUtc": "2026-01-19T22:06:24.3158345+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "2b543651-079a-4538-abe0-d2a1c902bd03",
+    "timestampUtc": "2026-01-19T22:06:32.5378416+00:00",
+    "type": "dmxChange",
+    "presetId": "6073ec88-2410-42b9-a181-6821d60206e1",
+    "presetName": "brightness high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "86e68594-8123-4dc6-bad9-826421edeb58",
+    "timestampUtc": "2026-01-19T22:06:39.0965083+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "95b83ef0-6ef6-4c0c-8b6a-117570bc06d3",
+    "timestampUtc": "2026-01-19T22:06:43.7956286+00:00",
+    "type": "dmxChange",
+    "presetId": "9d6252ad-8283-4229-a8fb-c9a71220152b",
+    "presetName": "red high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "5faea7bc-0f7e-4acb-9d6b-a3ceb038ada7",
+    "timestampUtc": "2026-01-19T22:06:51.5322213+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "1f2a311c-0d41-4a00-b2a7-ac4dcd620bc4",
+    "timestampUtc": "2026-01-19T22:07:12.8487875+00:00",
+    "type": "presetUpdated",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "5612c0de-5fd3-45bb-9782-95e21134298e",
+    "timestampUtc": "2026-01-19T22:07:24.5121948+00:00",
+    "type": "presetUpdated",
+    "presetId": "00df574f-8d27-47e1-b7f6-172aa7da09f1",
+    "presetName": "brightness med",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "c812d1c4-6c5f-4160-a242-dbc1748eade0",
+    "timestampUtc": "2026-01-19T22:07:33.1442015+00:00",
+    "type": "presetUpdated",
+    "presetId": "6073ec88-2410-42b9-a181-6821d60206e1",
+    "presetName": "brightness high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "7bd96917-2f22-49b4-a7be-064df5922d9e",
+    "timestampUtc": "2026-01-19T22:07:44.1606002+00:00",
+    "type": "dmxChange",
+    "presetId": "6073ec88-2410-42b9-a181-6821d60206e1",
+    "presetName": "brightness high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "f0b00ff5-cfe3-41f7-bdb5-f49c2a148fbb",
+    "timestampUtc": "2026-01-19T22:07:47.9588318+00:00",
+    "type": "dmxChange",
+    "presetId": "00df574f-8d27-47e1-b7f6-172aa7da09f1",
+    "presetName": "brightness med",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "65ef5d74-2e53-4d18-979a-7102df7c2237",
+    "timestampUtc": "2026-01-19T22:07:54.5602785+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "8caa94ed-a264-4990-ad6f-5c5055d3a1ea",
+    "timestampUtc": "2026-01-19T22:07:55.3881627+00:00",
+    "type": "dmxChange",
+    "presetId": "00df574f-8d27-47e1-b7f6-172aa7da09f1",
+    "presetName": "brightness med",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "8df8900a-089d-4a88-808b-4fa6818d675a",
+    "timestampUtc": "2026-01-19T22:08:04.6816538+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "95a4c041-c126-4941-bcb5-ecbfae275007",
+    "timestampUtc": "2026-01-19T22:08:11.969119+00:00",
+    "type": "dmxChange",
+    "presetId": "6073ec88-2410-42b9-a181-6821d60206e1",
+    "presetName": "brightness high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "5b90a8aa-8de2-4097-b756-a7c979c6fc37",
+    "timestampUtc": "2026-01-19T22:08:17.0290297+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "f3fabde1-69a7-41cd-b409-a6f1b5c3cdca",
+    "timestampUtc": "2026-01-19T22:08:43.3943522+00:00",
+    "type": "presetUpdated",
+    "presetId": "9f8a451f-be99-4f9c-8dc1-b730a9cf691b",
+    "presetName": "white high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "56c9aa5c-f27d-4a97-bb62-db790942be06",
+    "timestampUtc": "2026-01-19T22:08:50.6220594+00:00",
+    "type": "presetUpdated",
+    "presetId": "9d6252ad-8283-4229-a8fb-c9a71220152b",
+    "presetName": "red high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "339e85bb-9aa6-4248-b91f-ac706a1cf8aa",
+    "timestampUtc": "2026-01-19T22:08:56.6027632+00:00",
+    "type": "presetUpdated",
+    "presetId": "3cee5235-cce8-4148-b594-1a11f8be41fb",
+    "presetName": "green high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "5f43eb56-0050-4a2a-ac5d-5d633c852185",
+    "timestampUtc": "2026-01-19T22:09:02.1777092+00:00",
+    "type": "presetUpdated",
+    "presetId": "a48d2bf6-f3dc-4af2-a790-513676fde586",
+    "presetName": "blue high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "160a2352-afef-4b29-8d3b-826971711537",
+    "timestampUtc": "2026-01-19T22:09:13.160931+00:00",
+    "type": "dmxChange",
+    "presetId": "9f8a451f-be99-4f9c-8dc1-b730a9cf691b",
+    "presetName": "white high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "9af7f22b-044c-456f-9af8-eebb76142021",
+    "timestampUtc": "2026-01-19T22:09:18.4177238+00:00",
+    "type": "dmxChange",
+    "presetId": "9d6252ad-8283-4229-a8fb-c9a71220152b",
+    "presetName": "red high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "65a2a8ef-9dbb-4ccd-8511-0c566d9993e1",
+    "timestampUtc": "2026-01-19T22:09:23.1021824+00:00",
+    "type": "dmxChange",
+    "presetId": "3cee5235-cce8-4148-b594-1a11f8be41fb",
+    "presetName": "green high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "5655a724-3a43-4f8f-a393-1a196c9d0ec4",
+    "timestampUtc": "2026-01-19T22:09:27.725866+00:00",
+    "type": "dmxChange",
+    "presetId": "a48d2bf6-f3dc-4af2-a790-513676fde586",
+    "presetName": "blue high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "a3c9516d-f691-4f56-afa3-ab6801d093cd",
+    "timestampUtc": "2026-01-19T22:09:28.7333672+00:00",
+    "type": "dmxChange",
+    "presetId": "d88bc766-cef3-49bb-844b-305fa4dd8314",
+    "presetName": "blackout",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "259625ea-0ccc-4211-9a30-821a77ed5493",
+    "timestampUtc": "2026-01-19T22:09:31.0989001+00:00",
+    "type": "dmxChange",
+    "presetId": "d88bc766-cef3-49bb-844b-305fa4dd8314",
+    "presetName": "blackout",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "b549c807-7a96-42a1-b5ee-af6f0fc6bf71",
+    "timestampUtc": "2026-01-19T22:09:37.2367484+00:00",
+    "type": "dmxChange",
+    "presetId": "00df574f-8d27-47e1-b7f6-172aa7da09f1",
+    "presetName": "brightness med",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "5e0f3171-e460-4f00-9812-7cfd447210bf",
+    "timestampUtc": "2026-01-19T22:09:39.7732623+00:00",
+    "type": "dmxChange",
+    "presetId": "9f8a451f-be99-4f9c-8dc1-b730a9cf691b",
+    "presetName": "white high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "e7c1b4e7-1871-4a84-a2c4-435379ef10e2",
+    "timestampUtc": "2026-01-19T22:09:44.389656+00:00",
+    "type": "dmxChange",
+    "presetId": "9d6252ad-8283-4229-a8fb-c9a71220152b",
+    "presetName": "red high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "1f65f09b-3fbf-48da-91e8-a5fbb5c84cd5",
+    "timestampUtc": "2026-01-19T22:09:49.9771316+00:00",
+    "type": "dmxChange",
+    "presetId": "a48d2bf6-f3dc-4af2-a790-513676fde586",
+    "presetName": "blue high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "78eeade1-d1fd-4690-868a-d3f7e8331af9",
+    "timestampUtc": "2026-01-19T22:09:51.8608745+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "074d313d-4023-4fa0-a9a8-96a4409fc712",
+    "timestampUtc": "2026-01-19T22:09:58.4775506+00:00",
+    "type": "dmxChange",
+    "presetId": "a48d2bf6-f3dc-4af2-a790-513676fde586",
+    "presetName": "blue high",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "cd5a04d4-22a3-4717-a6e1-8e035f5e7be5",
+    "timestampUtc": "2026-01-19T22:10:04.0251441+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "83cc4ad0-170a-4b5b-80d4-b884506d3a28",
+    "timestampUtc": "2026-01-19T23:21:11.4215667+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
   }
 ]
