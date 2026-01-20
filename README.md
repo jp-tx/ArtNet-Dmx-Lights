@@ -4,11 +4,11 @@ this also has a fully functional api if you want to integrate artnet control int
 
 docker compose will look as such
 
-services:
-  artnet:
-    image: ghcr.io/jp-tx/artnetdmxlights:latest
-    restart: always
-    ports:
-      - (your port, http NOT https, if you want that use a reverse proxy):8080
+services:\
+&nbsp;&nbsp;  artnet: \
+&nbsp;&nbsp;&nbsp;&nbsp;    image: ghcr.io/jp-tx/artnetdmxlights:latest \
+&nbsp;&nbsp;&nbsp;&nbsp;    restart: always\
+&nbsp;&nbsp;&nbsp;&nbsp;    ports:\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      - (your port, http NOT https, if you want that use a reverse proxy):8080\
 networks: {}
 
