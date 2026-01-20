@@ -171,6 +171,202 @@ public sealed class ApiPresetTests
         Assert.Equal(50, universeFrames[0].Data[0]);
         Assert.Equal(100, universeFrames[^1].Data[0]);
     }
+
+    [Fact]
+    public async Task MovePreset_SwapsOrder()
+    {
+        await using var factory = new TestAppFactory();
+        var client = factory.CreateClient();
+
+        var groupResponse = await client.PostAsJsonAsync("/api/v1/groups", new FixtureGroup
+        {
+            Name = "Front Wash",
+            Universe = 0,
+            StartChannel = 1,
+            ChannelCount = 1
+        }, TestJson.Options);
+        var group = await groupResponse.Content.ReadFromJsonAsync<FixtureGroup>(TestJson.Options);
+
+        await client.PostAsJsonAsync("/api/v1/presets", new Preset
+        {
+            Name = "First",
+            FadeMs = 0,
+            Groups =
+            [
+                new PresetGroup
+                {
+                    GroupId = group!.Id,
+                    Values = [10]
+                }
+            ]
+        }, TestJson.Options);
+
+        var secondResponse = await client.PostAsJsonAsync("/api/v1/presets", new Preset
+        {
+            Name = "Second",
+            FadeMs = 0,
+            Groups =
+            [
+                new PresetGroup
+                {
+                    GroupId = group!.Id,
+                    Values = [20]
+                }
+            ]
+        }, TestJson.Options);
+        var second = await secondResponse.Content.ReadFromJsonAsync<Preset>(TestJson.Options);
+
+        var moveResponse = await client.PostAsync($"/api/v1/presets/{second!.Id}/move?direction=up", null);
+        moveResponse.EnsureSuccessStatusCode();
+
+        var listResponse = await client.GetAsync("/api/v1/presets");
+        listResponse.EnsureSuccessStatusCode();
+        var list = await listResponse.Content.ReadFromJsonAsync<List<Preset>>(TestJson.Options);
+
+        Assert.NotNull(list);
+        Assert.Equal("Second", list![0].Name);
+        Assert.Equal("First", list[1].Name);
+    }
+
+    [Fact]
+    public async Task MovePreset_UpdatesGridLocations()
+    {
+        await using var factory = new TestAppFactory();
+        var client = factory.CreateClient();
+        var store = factory.Services.GetRequiredService<IAppStateStore>();
+
+        var groupResponse = await client.PostAsJsonAsync("/api/v1/groups", new FixtureGroup
+        {
+            Name = "Grid",
+            Universe = 0,
+            StartChannel = 1,
+            ChannelCount = 1
+        }, TestJson.Options);
+        var group = await groupResponse.Content.ReadFromJsonAsync<FixtureGroup>(TestJson.Options);
+
+        var firstResponse = await client.PostAsJsonAsync("/api/v1/presets", new Preset
+        {
+            Name = "One",
+            FadeMs = 0,
+            Groups =
+            [
+                new PresetGroup
+                {
+                    GroupId = group!.Id,
+                    Values = [1]
+                }
+            ]
+        }, TestJson.Options);
+
+        var secondResponse = await client.PostAsJsonAsync("/api/v1/presets", new Preset
+        {
+            Name = "Two",
+            FadeMs = 0,
+            Groups =
+            [
+                new PresetGroup
+                {
+                    GroupId = group!.Id,
+                    Values = [2]
+                }
+            ]
+        }, TestJson.Options);
+
+        var thirdResponse = await client.PostAsJsonAsync("/api/v1/presets", new Preset
+        {
+            Name = "Three",
+            FadeMs = 0,
+            Groups =
+            [
+                new PresetGroup
+                {
+                    GroupId = group!.Id,
+                    Values = [3]
+                }
+            ]
+        }, TestJson.Options);
+
+        var second = await secondResponse.Content.ReadFromJsonAsync<Preset>(TestJson.Options);
+
+        var moveResponse = await client.PostAsync($"/api/v1/presets/{second!.Id}/grid?targetIndex=0", null);
+        moveResponse.EnsureSuccessStatusCode();
+
+        var snapshot = await store.GetSnapshotAsync(CancellationToken.None);
+        var ordered = snapshot.Presets.OrderBy(p => p.GridLocation).ToList();
+
+        Assert.Equal("Two", ordered[0].Name);
+        Assert.Equal(0, ordered[0].GridLocation);
+        Assert.Equal("One", ordered[1].Name);
+        Assert.Equal(1, ordered[1].GridLocation);
+        Assert.Equal("Three", ordered[2].Name);
+        Assert.Equal(2, ordered[2].GridLocation);
+    }
+
+    [Fact]
+    public async Task FixOrder_NormalizesListAndGrid()
+    {
+        await using var factory = new TestAppFactory();
+        var client = factory.CreateClient();
+        var store = factory.Services.GetRequiredService<IAppStateStore>();
+
+        var groupResponse = await client.PostAsJsonAsync("/api/v1/groups", new FixtureGroup
+        {
+            Name = "Fix",
+            Universe = 0,
+            StartChannel = 1,
+            ChannelCount = 1
+        }, TestJson.Options);
+        var group = await groupResponse.Content.ReadFromJsonAsync<FixtureGroup>(TestJson.Options);
+
+        var presetResponse = await client.PostAsJsonAsync("/api/v1/presets", new Preset
+        {
+            Name = "Alpha",
+            FadeMs = 0,
+            Groups =
+            [
+                new PresetGroup
+                {
+                    GroupId = group!.Id,
+                    Values = [10]
+                }
+            ]
+        }, TestJson.Options);
+        var preset = await presetResponse.Content.ReadFromJsonAsync<Preset>(TestJson.Options);
+
+        await store.UpdateAsync(state =>
+        {
+            var existing = state.Presets.First(p => p.Id == preset!.Id);
+            existing.ListOrder = 99;
+            existing.GridLocation = 99;
+            state.Presets.Add(new Preset
+            {
+                Id = Guid.NewGuid(),
+                Name = "Beta",
+                ListOrder = 2,
+                GridLocation = 5,
+                FadeMs = 0,
+                Groups =
+                [
+                    new PresetGroup
+                    {
+                        GroupId = group.Id,
+                        Values = [20]
+                    }
+                ]
+            });
+            return true;
+        }, CancellationToken.None);
+
+        var fixResponse = await client.PostAsync("/api/v1/presets/fix-order", null);
+        fixResponse.EnsureSuccessStatusCode();
+
+        var snapshot = await store.GetSnapshotAsync(CancellationToken.None);
+        var listOrders = snapshot.Presets.OrderBy(p => p.ListOrder).Select(p => p.ListOrder).ToList();
+        var gridOrders = snapshot.Presets.OrderBy(p => p.GridLocation).Select(p => p.GridLocation).ToList();
+
+        Assert.Equal([1, 2], listOrders);
+        Assert.Equal([0, 1], gridOrders);
+    }
 }
 
 public sealed class PresetTestAppFactory : TestAppFactory

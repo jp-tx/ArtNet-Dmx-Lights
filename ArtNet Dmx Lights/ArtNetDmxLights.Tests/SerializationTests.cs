@@ -79,6 +79,8 @@ public sealed class SerializationTests
         {
             Id = Guid.NewGuid(),
             Name = "Warm",
+            ListOrder = 3,
+            GridLocation = 5,
             FadeMs = 750,
             Groups =
             [
@@ -96,6 +98,8 @@ public sealed class SerializationTests
         Assert.NotNull(roundTrip);
         Assert.Equal(preset.Id, roundTrip!.Id);
         Assert.Equal(preset.Name, roundTrip.Name);
+        Assert.Equal(preset.ListOrder, roundTrip.ListOrder);
+        Assert.Equal(preset.GridLocation, roundTrip.GridLocation);
         Assert.Equal(preset.FadeMs, roundTrip.FadeMs);
         Assert.Single(roundTrip.Groups);
         Assert.Equal(preset.Groups[0].GroupId, roundTrip.Groups[0].GroupId);

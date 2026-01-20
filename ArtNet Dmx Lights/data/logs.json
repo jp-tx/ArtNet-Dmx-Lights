@@ -1600,5 +1600,23 @@
     "presetName": "brightness low",
     "groupId": null,
     "groupName": null
+  },
+  {
+    "id": "647c2e87-ee9d-43d2-92f6-f2d8b26794e1",
+    "timestampUtc": "2026-01-19T23:47:08.4515356+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
+  },
+  {
+    "id": "87e8647c-cb51-4a8a-8f88-49be15ac5fd2",
+    "timestampUtc": "2026-01-20T00:03:32.3008522+00:00",
+    "type": "dmxChange",
+    "presetId": "89cbd38f-c2b4-46f5-99c6-03d7e7755b02",
+    "presetName": "brightness low",
+    "groupId": null,
+    "groupName": null
   }
 ]

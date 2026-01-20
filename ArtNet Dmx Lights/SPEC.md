@@ -54,7 +54,9 @@ external integration.
 
 ## Data Persistence
 Data is stored as JSON files on disk inside the container (no volume mount
-required). A backup page provides a downloadable config JSON. Data includes:
+required). The data directory can be overridden via `ARTNET_DATA_PATH`; if not
+set, it defaults to `{content root}/data`. A backup page provides a downloadable
+config JSON. Data includes:
 - Network and connection settings (including manual time zone/coordinate overrides).
 - Fixture groups and their channel mappings.
 - Presets (can span one or multiple fixture groups).
@@ -89,6 +91,8 @@ Backup export includes configuration data only and excludes logs.
 ## Presets and Fixture Groups
 Presets store, at minimum:
 - Preset name.
+- List order (integer) for UI ordering.
+- Grid location (integer) for grid ordering.
 - One or more fixture groups included in the preset.
 - For each included group: values for each channel in the group.
 - Fade time (single value applied to all channels simultaneously).
@@ -97,6 +101,13 @@ Presets store, at minimum:
 - Fade curve: linear interpolation.
 - Preset application: if a preset omits channels/groups, those channels remain
   unchanged.
+- New presets append to the end of the list by using (max list order + 1).
+- New presets append to the end of the grid by using (max grid location + 1).
+- Reordering swaps list order values with the nearest neighbor.
+- Grid location is a 0-based slot index; slots 0-35 are the first grid, 36-71
+  the second, and so on.
+- Dragging onto a blank slot leaves a gap; dragging onto an occupied slot shifts
+  intervening presets and reassigns grid locations.
 - Scenes and presets are the same concept; use "preset" in UI and API.
 - Preset maintenance on group changes:
   - If a group channel count increases, extend values with zeros.
@@ -181,9 +192,16 @@ Backup import does not modify logs.
   - Deleting a preset removes schedules that reference it.
 - `POST /api/v1/presets/{presetId}/activate` activates a preset.
 - `POST /api/v1/presets/preview` applies a preset payload without saving.
-  - Preset fields: `id`, `name`, `fadeMs`, `groups`.
+  - Preset fields: `id`, `name`, `listOrder`, `gridLocation`, `fadeMs`, `groups`.
   - Preset group entry: `groupId`, `values` (array of 0-255, length =
     `channelCount` for the referenced group).
+- `POST /api/v1/presets/{presetId}/move?direction=up|down` swaps list order with
+  the adjacent preset. If already first/last, no change.
+- `POST /api/v1/presets/{presetId}/grid?targetIndex=###` reorders presets in the
+  grid by moving the preset to the target index; if the target is occupied, it
+  shifts intervening entries.
+- `POST /api/v1/presets/fix-order` normalizes list and grid order values by
+  reassigning list order from 1..N and grid locations from 0..N-1.
 
 ### Schedules
 - `GET /api/v1/schedules` lists schedules.

@@ -22,6 +22,7 @@ public sealed class AppStateStore : IAppStateStore
         try
         {
             _state = await LoadStateAsync(cancellationToken);
+            EnsurePresetOrdering(_state.Presets);
             await SaveStateAsync(_state, cancellationToken);
         }
         finally
@@ -154,6 +155,8 @@ public sealed class AppStateStore : IAppStateStore
         {
             Id = preset.Id,
             Name = preset.Name,
+            ListOrder = preset.ListOrder,
+            GridLocation = preset.GridLocation,
             FadeMs = preset.FadeMs,
             Groups = preset.Groups.Select(ClonePresetGroup).ToList()
         };
@@ -206,5 +209,42 @@ public sealed class AppStateStore : IAppStateStore
             LastScheduledAt = state.LastScheduledAt,
             LastScheduledPresetId = state.LastScheduledPresetId
         };
+    }
+
+    private static void EnsurePresetOrdering(List<Preset> presets)
+    {
+        if (presets.Count == 0)
+        {
+            return;
+        }
+
+        var listOrders = presets.Select(p => p.ListOrder).ToList();
+        var gridOrders = presets.Select(p => p.GridLocation).ToList();
+
+        var hasInvalidList = listOrders.Any(o => o <= 0) || listOrders.Distinct().Count() != presets.Count;
+        var hasInvalidGrid = gridOrders.Any(o => o < 0) || gridOrders.Distinct().Count() != presets.Count;
+
+        if (!hasInvalidList && !hasInvalidGrid)
+        {
+            return;
+        }
+
+        var ordered = presets
+            .OrderBy(p => p.ListOrder <= 0 ? int.MaxValue : p.ListOrder)
+            .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            if (hasInvalidList)
+            {
+                ordered[i].ListOrder = i + 1;
+            }
+
+            if (hasInvalidGrid)
+            {
+                ordered[i].GridLocation = i;
+            }
+        }
     }
 }

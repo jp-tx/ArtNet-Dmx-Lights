@@ -90,6 +90,7 @@
 
   async function loadPresets() {
     state.presets = await app.api("/api/v1/presets");
+    state.presets.sort((a, b) => (a.listOrder - b.listOrder) || a.name.localeCompare(b.name));
     presetList.innerHTML = "";
     presetCount.textContent = `${state.presets.length} presets`;
     if (!state.presets.length) {
@@ -102,9 +103,15 @@
       item.className = "list-item";
       item.innerHTML = `
         <header>
-          <div>
-            <h4>${preset.name}</h4>
-            <div class="mono">${preset.groups.length} group(s) - Fade ${preset.fadeMs} ms</div>
+          <div class="preset-meta">
+            <div class="list-arrows">
+              <button class="arrow-btn" data-action="move-up" aria-label="Move up">▲</button>
+              <button class="arrow-btn" data-action="move-down" aria-label="Move down">▼</button>
+            </div>
+            <div>
+              <h4>${preset.name}</h4>
+              <div class="mono">${preset.groups.length} group(s) - Fade ${preset.fadeMs} ms</div>
+            </div>
           </div>
           <div class="row">
             <button class="btn secondary" data-action="load">Edit</button>
@@ -126,6 +133,22 @@
         try {
           await app.api(`/api/v1/presets/${preset.id}`, { method: "DELETE" });
           showNotice("Preset deleted.");
+          await loadPresets();
+        } catch (error) {
+          showNotice(error.message);
+        }
+      });
+      item.querySelector("[data-action='move-up']").addEventListener("click", async () => {
+        try {
+          await app.api(`/api/v1/presets/${preset.id}/move?direction=up`, { method: "POST" });
+          await loadPresets();
+        } catch (error) {
+          showNotice(error.message);
+        }
+      });
+      item.querySelector("[data-action='move-down']").addEventListener("click", async () => {
+        try {
+          await app.api(`/api/v1/presets/${preset.id}/move?direction=down`, { method: "POST" });
           await loadPresets();
         } catch (error) {
           showNotice(error.message);

@@ -8,32 +8,43 @@
     <h1 class="page-title">Live Control</h1>
     <p class="page-subtitle">Switch presets instantly or let the schedule take over.</p>
 
-    <div class="grid two">
-        <div class="panel">
-            <div class="panel-header">
-                <h3 class="panel-title">Presets</h3>
-                <span class="status-pill" id="activePresetLabel">Idle</span>
-            </div>
-            <div id="presetList" class="list"></div>
-        </div>
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="list">List</button>
+        <button class="tab-btn" data-tab="grid">Grid</button>
+    </div>
 
-        <div class="panel">
-            <div class="panel-header">
-                <h3 class="panel-title">Now Playing</h3>
-                <span class="tag" id="activeSourceLabel">manual</span>
-            </div>
-            <div class="list">
-                <div class="list-item">
-                    <div class="mono">Active preset</div>
-                    <strong id="activePresetName">None</strong>
+    <div class="tab-panel active" id="tab-list">
+        <div class="grid two">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">Presets</h3>
+                    <span class="status-pill" id="activePresetLabel">Idle</span>
                 </div>
-                <div class="list-item">
-                    <div class="mono">Last scheduled</div>
-                    <strong id="lastScheduledTime">None</strong>
-                </div>
+                <div id="presetList" class="list"></div>
             </div>
-            <div class="notice" id="controlNotice" style="margin-top:16px; display:none;"></div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title">Now Playing</h3>
+                    <span class="tag" id="activeSourceLabel">manual</span>
+                </div>
+                <div class="list">
+                    <div class="list-item">
+                        <div class="mono">Active preset</div>
+                        <strong id="activePresetName">None</strong>
+                    </div>
+                    <div class="list-item">
+                        <div class="mono">Last scheduled</div>
+                        <strong id="lastScheduledTime">None</strong>
+                    </div>
+                </div>
+                <div class="notice" id="controlNotice" style="margin-top:16px; display:none;"></div>
+            </div>
         </div>
+    </div>
+
+    <div class="tab-panel" id="tab-grid">
+        <div id="presetGrid" class="preset-grid-stack"></div>
     </div>
 </section>
 
@@ -45,6 +56,13 @@
   const activeSourceLabel = document.getElementById("activeSourceLabel");
   const lastScheduledTime = document.getElementById("lastScheduledTime");
   const controlNotice = document.getElementById("controlNotice");
+  const presetGrid = document.getElementById("presetGrid");
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabPanels = {
+    list: document.getElementById("tab-list"),
+    grid: document.getElementById("tab-grid")
+  };
+  const state = { presets: [], listPresets: [], gridPresets: [], dragIndex: null };
 
   let noticeTimer = null;
   const showNotice = (text, durationMs = 4000) => {
@@ -63,14 +81,21 @@
   };
 
   async function loadPresets() {
-    const presets = await app.api("/api/v1/presets");
+    state.presets = await app.api("/api/v1/presets");
+    state.listPresets = [...state.presets].sort((a, b) => (a.listOrder - b.listOrder) || a.name.localeCompare(b.name));
+    state.gridPresets = [...state.presets].sort((a, b) => (a.gridLocation - b.gridLocation) || a.name.localeCompare(b.name));
+    renderPresetList();
+    renderPresetGrid();
+  }
+
+  function renderPresetList() {
     presetList.innerHTML = "";
-    if (!presets.length) {
+    if (!state.listPresets.length) {
       presetList.innerHTML = "<div class='list-item'>No presets yet. Create one in Presets.</div>";
       return;
     }
 
-    presets.forEach((preset) => {
+    state.listPresets.forEach((preset) => {
       const item = document.createElement("div");
       item.className = "list-item";
       item.innerHTML = `
@@ -85,16 +110,7 @@
           </div>
         </header>
       `;
-      item.querySelector("[data-action='activate']").addEventListener("click", async () => {
-        try {
-          showNotice(`Activating ${preset.name}...`, null);
-          await app.api(`/api/v1/presets/${preset.id}/activate`, { method: "POST" });
-          showNotice(`Activated ${preset.name}.`);
-          await loadStatus();
-        } catch (error) {
-          showNotice(error.message);
-        }
-      });
+      item.querySelector("[data-action='activate']").addEventListener("click", () => activatePreset(preset));
       item.querySelector("[data-action='copy']").addEventListener("click", async () => {
         const url = `${window.location.origin}/api/v1/presets/${preset.id}/activate`;
         const command = `curl -X POST "${url}"`;
@@ -108,6 +124,98 @@
       });
       presetList.appendChild(item);
     });
+  }
+
+  function renderPresetGrid() {
+    presetGrid.innerHTML = "";
+    const slotMap = new Map();
+    let maxLocation = -1;
+    state.gridPresets.forEach(preset => {
+      const index = Number.isFinite(preset.gridLocation) ? preset.gridLocation : 0;
+      slotMap.set(index, preset);
+      if (index > maxLocation) {
+        maxLocation = index;
+      }
+    });
+
+    const totalSlots = Math.max(36, maxLocation + 1);
+    const gridCount = Math.max(1, Math.ceil(totalSlots / 36));
+    for (let gridIndex = 0; gridIndex < gridCount; gridIndex += 1) {
+      const grid = document.createElement("div");
+      grid.className = "preset-grid";
+      for (let i = 0; i < 36; i += 1) {
+        const slotIndex = gridIndex * 36 + i;
+        const preset = slotMap.get(slotIndex);
+        const button = document.createElement("button");
+        button.className = "grid-btn";
+        button.dataset.index = slotIndex;
+        button.type = "button";
+        if (!preset) {
+          button.classList.add("blank");
+          button.textContent = "";
+          button.setAttribute("aria-disabled", "true");
+          button.tabIndex = -1;
+        } else {
+          button.dataset.presetId = preset.id;
+          button.textContent = preset.name;
+          button.draggable = true;
+          button.addEventListener("dragstart", (event) => {
+            state.dragIndex = slotIndex;
+            button.classList.add("dragging");
+            if (event.dataTransfer) {
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", preset.id);
+            }
+          });
+          button.addEventListener("dragend", () => {
+            state.dragIndex = null;
+            button.classList.remove("dragging");
+          });
+          button.addEventListener("click", () => activatePreset(preset));
+        }
+        button.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          button.classList.add("drop-target");
+        });
+        button.addEventListener("dragleave", () => {
+          button.classList.remove("drop-target");
+        });
+        button.addEventListener("drop", async (event) => {
+          event.preventDefault();
+          button.classList.remove("drop-target");
+          if (state.dragIndex === null || state.dragIndex === slotIndex) {
+            return;
+          }
+          const draggedPreset = state.gridPresets.find(p => p.gridLocation === state.dragIndex);
+          if (!draggedPreset) {
+            return;
+          }
+          await moveGridPreset(draggedPreset.id, slotIndex);
+        });
+        grid.appendChild(button);
+      }
+      presetGrid.appendChild(grid);
+    }
+  }
+
+  async function activatePreset(preset) {
+    try {
+      showNotice(`Activating ${preset.name}...`, null);
+      await app.api(`/api/v1/presets/${preset.id}/activate`, { method: "POST" });
+      showNotice(`Activated ${preset.name}.`);
+      await loadStatus();
+    } catch (error) {
+      showNotice(error.message);
+    }
+  }
+
+  async function moveGridPreset(presetId, targetIndex) {
+    try {
+      await app.api(`/api/v1/presets/${presetId}/grid?targetIndex=${targetIndex}`, { method: "POST" });
+      await loadPresets();
+    } catch (error) {
+      showNotice(error.message);
+    }
   }
 
   async function loadStatus() {
@@ -126,7 +234,24 @@
     activePresetName.textContent = active ? active.name : "Unknown";
   }
 
+  tabButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      setActiveTab(button.dataset.tab);
+    });
+  });
+
+  const defaultTab = window.location.pathname.toLowerCase().endsWith("/grid") ? "grid" : "list";
+  setActiveTab(defaultTab);
+
   loadPresets().then(loadStatus).catch(error => showNotice(error.message));
+
+  function setActiveTab(tabName) {
+    tabButtons.forEach(b => b.classList.remove("active"));
+    Object.values(tabPanels).forEach(panel => panel.classList.remove("active"));
+    const target = tabPanels[tabName] ? tabName : "list";
+    document.querySelector(`.tab-btn[data-tab='${target}']`).classList.add("active");
+    tabPanels[target].classList.add("active");
+  }
 
   async function copyToClipboard(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {

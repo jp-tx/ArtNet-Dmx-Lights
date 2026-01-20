@@ -6,7 +6,11 @@ using ArtNet_Dmx_Lights.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages()
+    .AddRazorPagesOptions(options =>
+    {
+        options.Conventions.AddPageRoute("/Index", "grid");
+    });
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;

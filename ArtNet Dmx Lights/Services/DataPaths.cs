@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace ArtNet_Dmx_Lights.Services;
@@ -13,7 +14,15 @@ public static class DataPaths
     public const string RuntimeFileName = "runtime.json";
 
     public static string GetDataDirectory(string basePath)
-        => Path.Combine(basePath, DataDirectoryName);
+    {
+        var overridePath = Environment.GetEnvironmentVariable("ARTNET_DATA_PATH");
+        if (!string.IsNullOrWhiteSpace(overridePath))
+        {
+            return overridePath;
+        }
+
+        return Path.Combine(basePath, DataDirectoryName);
+    }
 
     public static string GetSettingsPath(string basePath)
         => Path.Combine(GetDataDirectory(basePath), SettingsFileName);
