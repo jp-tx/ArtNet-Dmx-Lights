@@ -240,7 +240,8 @@
     });
   });
 
-  const defaultTab = window.location.pathname.toLowerCase().endsWith("/grid") ? "grid" : "list";
+  const path = window.location.pathname.toLowerCase();
+  const defaultTab = path.endsWith("/list") ? "list" : "grid";
   setActiveTab(defaultTab);
 
   loadPresets().then(loadStatus).catch(error => showNotice(error.message));
